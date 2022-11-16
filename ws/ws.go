@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	clients       = make(map[string]*websocket.Conn)
+	clients       = make(map[string]Client)
 	messageBus    = make(chan Message)
 	messageWriter = defaultMessageWriter
 )
@@ -47,7 +47,10 @@ func ServeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clients[r.RemoteAddr] = ws
+	clients[r.RemoteAddr] = Client{
+		Addr: r.RemoteAddr,
+		Conn: ws,
+	}
 
 	readFromWs(ws, r.RemoteAddr)
 }
@@ -86,8 +89,8 @@ func WriteToWS() {
 	defer func() {
 		pingTicker.Stop()
 
-		for key := range clients {
-			closeConnection(key)
+		for _, client := range clients {
+			closeConnection(client.Addr)
 		}
 	}()
 
@@ -95,27 +98,27 @@ func WriteToWS() {
 		var err error
 		select {
 		case msg := <-messageBus:
-			for key, client := range clients {
-				err = client.WriteJSON(msg)
+			for _, client := range clients {
+				err = client.Conn.WriteJSON(msg)
 
 				if err != nil {
-					closeConnection(key)
+					closeConnection(client.Addr)
 				}
 			}
 		case <-pingTicker.C:
-			for key, client := range clients {
-				if err = client.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-					closeConnection(key)
+			for _, client := range clients {
+				if err = client.Conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+					closeConnection(client.Addr)
 				}
 			}
 		}
 	}
 }
 
-func closeConnection(client string) {
+func closeConnection(addr string) {
 	fmt.Printf("WS closing client connection. Remaining clients: %d \n", len(clients)-1)
-	_ = clients[client].Close()
-	delete(clients, client)
+	_ = clients[addr].Conn.Close()
+	delete(clients, addr)
 }
 
 func WriteMessage(msgType string, payload any) {

@@ -1,20 +1,21 @@
-package data
+package cpu
 
 import (
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/jsawo/colin-server/data"
 	"github.com/mackerelio/go-osstat/cpu"
 )
 
-const cpuKey = "cpu"
+const key = "cpu"
 
 func init() {
-	register(cpuKey, getCpu)
+	data.Register(key, collect)
 }
 
-func getCpu() any {
+func collect() any {
 	before, err := cpu.Get()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)

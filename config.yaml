@@ -3,15 +3,15 @@ collectors:
     channel: memory # name of the channel on which results will get exposed
     title: memory use # used for ToC
     description: Percentage of memory used. # used for ToC
-    enabled: true
+    enabled: true # should this collector be running
     type: gauge # gauge / counter / histogram / string / json
-    frequency: 3s # XXs / XXm / XXh - how ofter should we run the collector
+    frequency: 2s # XXs / XXm / XXh / XXmYYs - how ofter should we run the collector
   - key: cpu
     channel: processor
     title: cpu use
     description: Percentage of cpu used.
-    enabled: true
+    enabled: false
     type: gauge 
-    frequency: 3s
+    frequency: 5s
 
   # - type: histogram 0.5|1.0|2.5|5.0|10

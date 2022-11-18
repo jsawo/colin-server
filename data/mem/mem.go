@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jsawo/colin-server/data"
 	"github.com/mackerelio/go-osstat/memory"
 )
 
-const memKey = "mem"
+const key = "mem"
 
 func init() {
-	register(memKey, getMem)
+	data.Register(key, collect)
 }
 
-func getMem() any {
+func collect() any {
 	memory, err := memory.Get()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)

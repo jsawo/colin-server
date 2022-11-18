@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
@@ -28,6 +29,15 @@ type Collector struct {
 	Enabled     bool   `yaml:"enabled"`
 	Type        string `yaml:"type"`
 	Frequency   string `yaml:"frequency"`
+}
+
+func (c *Collector) GetFrequency() time.Duration {
+	freq, err := time.ParseDuration(c.Frequency)
+	if err != nil {
+		log.Fatalf("Error when parsing collector frequency %q - %s", c.Frequency, err.Error())
+	}
+
+	return freq
 }
 
 func readInConfig() {

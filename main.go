@@ -7,13 +7,16 @@ import (
 
 	"github.com/jsawo/colin-server/data"
 	"github.com/jsawo/colin-server/ws"
+
+	_ "github.com/jsawo/colin-server/data/cpu"
+	_ "github.com/jsawo/colin-server/data/mem"
 )
 
 func main() {
 	readInConfig()
 
 	go StartServer()
-	go generateNoise()
+	// go generateNoise()
 
 	RunCollectors()
 
@@ -22,16 +25,18 @@ func main() {
 
 func RunCollectors() {
 	for _, collector := range AppConfig.Collectors {
-		fmt.Printf("starting monitoring for a collector: %v \n", collector.Key)
-		go MonitorCollector(collector)
+		if collector.Enabled {
+			go MonitorCollector(collector)
+		}
 	}
 }
 
 func MonitorCollector(collector Collector) {
+	sleepDuration := collector.GetFrequency()
 	for {
 		result := data.Registry[collector.Key]()
 		ws.WriteMessage(collector.Channel, result)
-		time.Sleep(time.Duration(5) * time.Second)
+		time.Sleep(sleepDuration)
 	}
 }
 

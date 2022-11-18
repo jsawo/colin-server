@@ -1,9 +1,9 @@
 package data
 
-type Collector func() any
+type Collect func() any
 
 var Registry = make(map[string]func() any)
 
-func register(topic string, callable Collector) {
+func Register(topic string, callable Collect) {
 	Registry[topic] = callable
 }

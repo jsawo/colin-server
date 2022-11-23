@@ -2,9 +2,10 @@ package cpu
 
 import (
 	"fmt"
-	"github.com/jsawo/colin-server/data"
 	"os"
 	"time"
+
+	"github.com/jsawo/colin-server/data"
 
 	"github.com/mackerelio/go-osstat/cpu"
 )

@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jsawo/colin-server/data"
 	"log"
 	"os/exec"
+
+	"github.com/jsawo/colin-server/data"
 )
 
 const key = "cmd"

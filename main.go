@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/jsawo/colin-server/data"
 	"math/rand"
 	"time"
+
+	"github.com/jsawo/colin-server/data"
 
 	"github.com/jsawo/colin-server/ws"
 

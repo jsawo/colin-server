@@ -2,8 +2,9 @@ package data
 
 import (
 	"fmt"
-	"github.com/jsawo/colin-server/data"
 	"os"
+
+	"github.com/jsawo/colin-server/data"
 
 	"github.com/mackerelio/go-osstat/memory"
 )

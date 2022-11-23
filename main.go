@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/jsawo/colin-server/data"
 	"math/rand"
 	"time"
 
-	"github.com/jsawo/colin-server/data"
 	"github.com/jsawo/colin-server/ws"
 
+	_ "github.com/jsawo/colin-server/data/cmd"
 	_ "github.com/jsawo/colin-server/data/cpu"
 	_ "github.com/jsawo/colin-server/data/mem"
 )
@@ -24,19 +25,19 @@ func main() {
 }
 
 func RunCollectors() {
-	for _, collector := range AppConfig.Collectors {
+	for _, collector := range CollectorConfigs {
 		if collector.Enabled {
 			go MonitorCollector(collector)
 		}
 	}
 }
 
-func MonitorCollector(collector Collector) {
-	sleepDuration := collector.GetFrequency()
+func MonitorCollector(collector CollectorConfig) {
+	data.Registry[collector.Key].Setup(collector.Params)
 	for {
-		result := data.Registry[collector.Key]()
+		result := data.Registry[collector.Key].Collect()
 		ws.WriteMessage(collector.Channel, result)
-		time.Sleep(sleepDuration)
+		time.Sleep(collector.Frequency)
 	}
 }
 

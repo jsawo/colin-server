@@ -3,8 +3,8 @@ collectors:
     channel: memory # name of the channel on which results will get exposed
     title: memory use # used for ToC
     description: Percentage of memory used. # used for ToC
-    enabled: true # should this collector be running
-    type: gauge # gauge / counter / histogram / string / json
+    enabled: false # should this collector be running
+    type: gauge # gauge / counter / histogram 0.5|1.0|2.5|5.0|10 / text / json
     frequency: 2s # XXs / XXm / XXh / XXmYYs - how ofter should we run the collector
   - key: cpu
     channel: processor
@@ -13,5 +13,11 @@ collectors:
     enabled: false
     type: gauge 
     frequency: 5s
-
-  # - type: histogram 0.5|1.0|2.5|5.0|10
+  - key: cmd
+    channel: top
+    command: top -b | head -n 5
+    title: top processes
+    description: current top processes
+    enabled: true
+    type: text
+    frequency: 2s

@@ -2,20 +2,24 @@ package cpu
 
 import (
 	"fmt"
+	"github.com/jsawo/colin-server/data"
 	"os"
 	"time"
 
-	"github.com/jsawo/colin-server/data"
 	"github.com/mackerelio/go-osstat/cpu"
 )
 
 const key = "cpu"
 
+type cpuCollector struct{}
+
 func init() {
-	data.Register(key, collect)
+	data.Register(key, &cpuCollector{})
 }
 
-func collect() any {
+func (c *cpuCollector) Setup(params map[string]any) {}
+
+func (c *cpuCollector) Collect() any {
 	before, err := cpu.Get()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)

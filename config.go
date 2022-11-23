@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -14,45 +15,78 @@ const (
 )
 
 var (
-	AppConfig *Config
+	collectorConfig  *AppConfig
+	CollectorConfigs = map[string]CollectorConfig{}
 )
 
-type Config struct {
-	Collectors []Collector `yaml:"collectors"`
+type AppConfig struct {
+	Entries []Entry `yaml:"collectors"`
 }
 
-type Collector struct {
-	Key         string `yaml:"key"`
-	Channel     string `yaml:"channel"`
-	Title       string `yaml:"title"`
-	Description string `yaml:"description"`
-	Enabled     bool   `yaml:"enabled"`
-	Type        string `yaml:"type"`
-	Frequency   string `yaml:"frequency"`
-}
-
-func (c *Collector) GetFrequency() time.Duration {
-	freq, err := time.ParseDuration(c.Frequency)
-	if err != nil {
-		log.Fatalf("Error when parsing collector frequency %q - %s", c.Frequency, err.Error())
-	}
-
-	return freq
-}
+type Entry map[string]string
 
 func readInConfig() {
-	cfg, err := NewConfig(configPath)
+	cfg, err := parseConfig(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	AppConfig = cfg
+	collectorConfig = cfg
 
-	fmt.Printf("Parsed config: %+v \n", AppConfig)
+	fmt.Printf("Parsed config: %+v \n\n", collectorConfig)
+
+	for _, entry := range collectorConfig.Entries {
+		fmt.Printf("- entry: %+v \n", entry)
+		parsedCollector := parseCollector(entry)
+
+		if _, ok := CollectorConfigs[parsedCollector.Key]; ok {
+			log.Fatalf("multiple collectors with the same key are not allowed: %q", parsedCollector.Key)
+		}
+
+		CollectorConfigs[parsedCollector.Key] = parsedCollector
+	}
 }
 
-func NewConfig(configPath string) (*Config, error) {
-	config := &Config{}
+func parseCollector(entry Entry) CollectorConfig {
+	collector := CollectorConfig{
+		Params: map[string]any{},
+	}
+
+	validateEntry(entry)
+
+	collectorType, ok := parseCollectorType(entry["type"])
+	if !ok {
+		log.Fatalf("unrecognized collector type: %s", entry["type"])
+	}
+	freq, err := time.ParseDuration(entry["frequency"])
+	if err != nil {
+		log.Fatalf("error when parsing collector frequency %q - %s", entry["frequency"], err.Error())
+	}
+
+	collector.Enabled = entry["enabled"] == "true"
+	collector.Type = collectorType
+	collector.Frequency = freq
+
+	for key, value := range entry {
+		switch key {
+		case "key":
+			collector.Key = entry[key]
+		case "channel":
+			collector.Channel = entry[key]
+		case "title":
+			collector.Title = entry[key]
+		case "description":
+			collector.Description = entry[key]
+		default:
+			collector.Params[key] = value
+		}
+	}
+
+	return collector
+}
+
+func parseConfig(configPath string) (*AppConfig, error) {
+	config := &AppConfig{}
 
 	file, err := os.Open(configPath)
 	if err != nil {
@@ -68,13 +102,23 @@ func NewConfig(configPath string) (*Config, error) {
 	return config, nil
 }
 
-func ValidateConfigPath(path string) error {
-	fileStat, err := os.Stat(path)
-	if err != nil {
-		return err
+func validateEntry(entry Entry) {
+	key, ok := entry["key"]
+	if !ok {
+		log.Fatal("'key' value is missing in a collector configuration")
 	}
-	if fileStat.IsDir() {
-		return fmt.Errorf("%q is a directory, file expected", path)
+
+	requireValue(entry, key, "channel")
+	requireValue(entry, key, "title")
+	requireValue(entry, key, "description")
+}
+
+func requireValue(entry Entry, collectorKey, entryKey string) {
+	if _, ok := entry[entryKey]; !ok {
+		log.Fatalf("%q is missing in a %q collector configuration", entryKey, collectorKey)
 	}
-	return nil
+
+	if strings.Trim(entry[entryKey], " ") == "" {
+		log.Fatalf("%q cannot be empty in a %q collector configuration", entryKey, collectorKey)
+	}
 }

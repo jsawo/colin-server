@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -10,7 +12,7 @@ import (
 
 var (
 	server *http.Server
-	done   chan (interface{})
+	done   = make(chan interface{})
 )
 
 const (
@@ -19,7 +21,6 @@ const (
 
 func StartServer() {
 	fmt.Println("Starting HTTP server")
-	done = make(chan interface{})
 
 	server = makeHTTPServer(serverPort)
 
@@ -55,4 +56,28 @@ func makeHTTPServer(serverPort string) *http.Server {
 
 func registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/ws", ws.ServeWS)
+	mux.HandleFunc("/toc", serveTOC)
+}
+
+func serveTOC(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := make(map[string]map[string]string)
+	for _, collector := range CollectorConfigs {
+		if collector.Enabled {
+			resp[collector.Channel] = map[string]string{
+				"title":       collector.Title,
+				"description": collector.Description,
+				"type":        collector.Type.ToString(),
+				"frequency":   collector.Frequency.String(),
+			}
+		}
+	}
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
 }

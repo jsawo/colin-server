@@ -28,6 +28,16 @@ func parseCollectorType(str string) (CollectorType, bool) {
 	return c, ok
 }
 
+func (c CollectorType) ToString() string {
+	for key, value := range collectorTypeMap {
+		if value == c {
+			return key
+		}
+	}
+
+	return "unknown"
+}
+
 type CollectorConfig struct {
 	Key         string
 	Channel     string

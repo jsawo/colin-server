@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os/exec"
 
@@ -32,7 +31,6 @@ func (c *cmdCollector) Setup(params map[string]any) {
 }
 
 func (c *cmdCollector) Collect() any {
-	fmt.Println("running setup for CMD: " + c.command)
 	cmd := exec.Command("sh", "-c", c.command)
 	if c.directory != "" {
 		cmd.Dir = c.directory

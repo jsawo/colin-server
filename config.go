@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -33,10 +32,7 @@ func readInConfig() {
 
 	collectorConfig = cfg
 
-	fmt.Printf("Parsed config: %+v \n\n", collectorConfig)
-
 	for _, entry := range collectorConfig.Entries {
-		fmt.Printf("- entry: %+v \n", entry)
 		parsedCollector := parseCollector(entry)
 
 		if _, ok := CollectorConfigs[parsedCollector.Key]; ok {

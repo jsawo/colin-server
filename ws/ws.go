@@ -126,7 +126,7 @@ func WriteMessage(msgType string, payload any) {
 }
 
 func writeMessage(msg Message) {
-	fmt.Printf("WS message: %q \n", msg)
+	//fmt.Printf("WS message: %q \n", msg)
 	messageWriter(msg)
 }
 

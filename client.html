@@ -2,17 +2,17 @@
 <html lang="en">
 
 <head>
-  <title>Command Example</title>
+  <title>Client Example</title>
   <script type="text/javascript">
-    window.onload = function () {
+    const reconnect = function () {
       const address = "ws://localhost:9111/ws"
 
-      var conn;
-      var msg = document.getElementById("msg")
-      var log = document.getElementById("log")
+      let conn
+      let msg = document.getElementById("msg")
+      let log = document.getElementById("log")
 
       function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1
+        let doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1
         log.appendChild(item)
         if (doScroll) {
           log.scrollTop = log.scrollHeight - log.clientHeight
@@ -20,38 +20,53 @@
       }
 
       document.getElementById("form").onsubmit = function () {
-        if (!conn) {
-          return false
-        }
-        if (!msg.value) {
-          return false
-        }
+        if (!conn) return false
+        if (!msg.value) return false
         conn.send(msg.value)
         msg.value = ""
         return false
-      };
+      }
 
       if (window["WebSocket"]) {
         conn = new WebSocket(address)
         conn.onclose = function (evt) {
-          var item = document.createElement("div")
+          let item = document.createElement("div")
           item.innerHTML = "<b>Connection closed.</b>"
           appendLog(item)
-        };
+          setTimeout(() => {
+            let item = document.createElement("div")
+            item.innerHTML = "<b>trying to reconnect …</b>"
+            appendLog(item)
+            reconnect()
+          }, 5000)
+        }
         conn.onmessage = function (evt) {
-          var messages = evt.data.split('\n')
-          for (var i = 0; i < messages.length; i++) {
-            var item = document.createElement("div")
-            item.innerText = messages[i]
+          let messages = evt.data.split('\n')
+          for (let i = 0; i < messages.length; i++) {
+            if (messages[i] === "") continue
+            let item = document.createElement("div")
+            let msg = JSON.parse(messages[i])
+            let d = new Date(msg["timestamp"])
+            item.innerHTML = `${d.toLocaleString("pl-PL")} - <b>${msg["type"]}</b> - ${msg["payload"]}`
             appendLog(item)
           }
-        };
+        }
+        conn.onopen = function (evt) {
+          let item = document.createElement("div")
+          item.innerHTML = "<b>Connection opened.</b>"
+          appendLog(item)
+
+          conn.send("SUB *") // <- subscribe to channels
+        }
       } else {
-        var item = document.createElement("div")
+        let item = document.createElement("div")
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>"
         appendLog(item)
       }
-    };
+    }
+
+    window.onload = reconnect
+
   </script>
   <style type="text/css">
     html {

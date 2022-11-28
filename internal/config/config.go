@@ -1,10 +1,12 @@
-package main
+package config
 
 import (
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/jsawo/colin-server/internal/model"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,7 +17,7 @@ const (
 
 var (
 	collectorConfig  *AppConfig
-	CollectorConfigs = map[string]CollectorConfig{}
+	CollectorConfigs = map[string]model.CollectorConfig{}
 )
 
 type AppConfig struct {
@@ -24,7 +26,7 @@ type AppConfig struct {
 
 type Entry map[string]string
 
-func readInConfig() {
+func ReadInConfig() {
 	cfg, err := parseConfig(configPath)
 	if err != nil {
 		log.Fatal(err)
@@ -43,14 +45,14 @@ func readInConfig() {
 	}
 }
 
-func parseCollector(entry Entry) CollectorConfig {
-	collector := CollectorConfig{
+func parseCollector(entry Entry) model.CollectorConfig {
+	col := model.CollectorConfig{
 		Params: map[string]any{},
 	}
 
 	validateEntry(entry)
 
-	collectorType, ok := parseCollectorType(entry["type"])
+	collectorType, ok := model.ParseCollectorType(entry["type"])
 	if !ok {
 		log.Fatalf("unrecognized collector type: %s", entry["type"])
 	}
@@ -59,26 +61,26 @@ func parseCollector(entry Entry) CollectorConfig {
 		log.Fatalf("error when parsing collector frequency %q - %s", entry["frequency"], err.Error())
 	}
 
-	collector.Enabled = entry["enabled"] == "true"
-	collector.Type = collectorType
-	collector.Frequency = freq
+	col.Enabled = entry["enabled"] == "true"
+	col.Type = collectorType
+	col.Frequency = freq
 
 	for key, value := range entry {
 		switch key {
 		case "key":
-			collector.Key = entry[key]
+			col.Key = entry[key]
 		case "channel":
-			collector.Channel = entry[key]
+			col.Channel = entry[key]
 		case "title":
-			collector.Title = entry[key]
+			col.Title = entry[key]
 		case "description":
-			collector.Description = entry[key]
+			col.Description = entry[key]
 		default:
-			collector.Params[key] = value
+			col.Params[key] = value
 		}
 	}
 
-	return collector
+	return col
 }
 
 func parseConfig(configPath string) (*AppConfig, error) {

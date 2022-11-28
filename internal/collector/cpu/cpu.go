@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/jsawo/colin-server/data"
+	"github.com/jsawo/colin-server/internal/model"
 
 	"github.com/mackerelio/go-osstat/cpu"
 )
@@ -15,7 +15,7 @@ const key = "cpu"
 type cpuCollector struct{}
 
 func init() {
-	data.Register(key, &cpuCollector{})
+	model.Register(key, &cpuCollector{})
 }
 
 func (c *cpuCollector) Setup(params map[string]any) {}

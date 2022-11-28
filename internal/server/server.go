@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jsawo/colin-server/ws"
+	"github.com/jsawo/colin-server/internal/config"
+	"github.com/jsawo/colin-server/internal/ws"
 )
 
 var (
@@ -64,7 +65,7 @@ func serveTOC(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	resp := make(map[string]map[string]string)
-	for _, collector := range CollectorConfigs {
+	for _, collector := range config.CollectorConfigs {
 		if collector.Enabled {
 			resp[collector.Channel] = map[string]string{
 				"title":       collector.Title,

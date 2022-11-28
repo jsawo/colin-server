@@ -1,9 +1,6 @@
-package main
+package model
 
-import (
-	"strings"
-	"time"
-)
+import "strings"
 
 const (
 	TypeGauge = iota
@@ -23,7 +20,7 @@ var collectorTypeMap = map[string]CollectorType{
 	"histogram": TypeHistogram,
 }
 
-func parseCollectorType(str string) (CollectorType, bool) {
+func ParseCollectorType(str string) (CollectorType, bool) {
 	c, ok := collectorTypeMap[strings.ToLower(str)]
 	return c, ok
 }
@@ -36,15 +33,4 @@ func (c CollectorType) ToString() string {
 	}
 
 	return "unknown"
-}
-
-type CollectorConfig struct {
-	Key         string
-	Channel     string
-	Title       string
-	Description string
-	Enabled     bool
-	Type        CollectorType
-	Frequency   time.Duration
-	Params      map[string]any
 }

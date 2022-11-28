@@ -5,19 +5,24 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/jsawo/colin-server/data"
+	"github.com/jsawo/colin-server/internal/config"
+	"github.com/jsawo/colin-server/internal/model"
+	"github.com/jsawo/colin-server/internal/server"
+	"github.com/jsawo/colin-server/internal/ws"
 
-	"github.com/jsawo/colin-server/ws"
+	_ "github.com/jsawo/colin-server/internal/collector/cmd"
+	_ "github.com/jsawo/colin-server/internal/collector/cpu"
+	_ "github.com/jsawo/colin-server/internal/collector/mem"
+)
 
-	_ "github.com/jsawo/colin-server/data/cmd"
-	_ "github.com/jsawo/colin-server/data/cpu"
-	_ "github.com/jsawo/colin-server/data/mem"
+var (
+	done = make(chan interface{})
 )
 
 func main() {
-	readInConfig()
+	config.ReadInConfig()
 
-	go StartServer()
+	go server.StartServer()
 	// go generateNoise()
 
 	RunCollectors()
@@ -26,19 +31,19 @@ func main() {
 }
 
 func RunCollectors() {
-	for _, collector := range CollectorConfigs {
-		if collector.Enabled {
-			go MonitorCollector(collector)
+	for _, col := range config.CollectorConfigs {
+		if col.Enabled {
+			go MonitorCollector(col)
 		}
 	}
 }
 
-func MonitorCollector(collector CollectorConfig) {
-	data.Registry[collector.Key].Setup(collector.Params)
+func MonitorCollector(col model.CollectorConfig) {
+	model.Registry[col.Key].Setup(col.Params)
 	for {
-		result := data.Registry[collector.Key].Collect()
-		ws.WriteMessage(collector.Channel, result)
-		time.Sleep(collector.Frequency)
+		result := model.Registry[col.Key].Collect()
+		ws.WriteMessage(col.Channel, result)
+		time.Sleep(col.Frequency)
 	}
 }
 

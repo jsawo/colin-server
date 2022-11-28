@@ -4,7 +4,7 @@ import (
 	"log"
 	"os/exec"
 
-	"github.com/jsawo/colin-server/data"
+	"github.com/jsawo/colin-server/internal/model"
 )
 
 const key = "cmd"
@@ -15,7 +15,7 @@ type cmdCollector struct {
 }
 
 func init() {
-	data.Register(key, &cmdCollector{})
+	model.Register(key, &cmdCollector{})
 }
 
 func (c *cmdCollector) Setup(params map[string]any) {

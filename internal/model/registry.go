@@ -1,11 +1,6 @@
-package data
+package model
 
 type Collect func() any
-
-type Collector interface {
-	Setup(collectorConfig map[string]any)
-	Collect() any
-}
 
 var Registry = make(map[string]Collector)
 

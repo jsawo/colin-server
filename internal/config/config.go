@@ -69,8 +69,8 @@ func parseCollector(entry Entry) model.CollectorConfig {
 		switch key {
 		case "key":
 			col.Key = entry[key]
-		case "channel":
-			col.Channel = entry[key]
+		case "topic":
+			col.Topic = entry[key]
 		case "title":
 			col.Title = entry[key]
 		case "description":
@@ -106,7 +106,7 @@ func validateEntry(entry Entry) {
 		log.Fatal("'key' value is missing in a collector configuration")
 	}
 
-	requireValue(entry, key, "channel")
+	requireValue(entry, key, "topic")
 	requireValue(entry, key, "title")
 	requireValue(entry, key, "description")
 }

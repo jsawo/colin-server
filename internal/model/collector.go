@@ -11,7 +11,7 @@ type Collector interface {
 
 type CollectorConfig struct {
 	Key         string
-	Channel     string
+	Topic       string
 	Title       string
 	Description string
 	Enabled     bool

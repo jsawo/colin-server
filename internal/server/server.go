@@ -67,7 +67,7 @@ func serveTOC(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]map[string]string)
 	for _, collector := range config.CollectorConfigs {
 		if collector.Enabled {
-			resp[collector.Channel] = map[string]string{
+			resp[collector.Topic] = map[string]string{
 				"title":       collector.Title,
 				"description": collector.Description,
 				"type":        collector.Type.ToString(),

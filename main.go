@@ -42,7 +42,7 @@ func MonitorCollector(col model.CollectorConfig) {
 	model.Registry[col.Key].Setup(col.Params)
 	for {
 		result := model.Registry[col.Key].Collect()
-		ws.WriteMessage(col.Channel, result)
+		ws.WriteMessage(col.Topic, result)
 		time.Sleep(col.Frequency)
 	}
 }

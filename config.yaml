@@ -1,20 +1,20 @@
 collectors:
   - key: mem # which collector to instantiate
-    channel: memory # name of the channel on which results will get exposed
+    topic: memory # name of the topic on which results will get exposed
     title: memory use # used for ToC
     description: Percentage of memory used. # used for ToC
     enabled: true # should this collector be running
     type: gauge # gauge / counter / histogram 0.5|1.0|2.5|5.0|10 / text / json
     frequency: 10s # XXs / XXm / XXh / XXmYYs - how ofter should we run the collector
   - key: cpu
-    channel: processor
+    topic: processor
     title: cpu use
     description: Percentage of cpu used.
     enabled: true
     type: gauge 
     frequency: 5s
   - key: cmd
-    channel: top
+    topic: top
     command: top -b | head -n 5
     title: top processes
     description: current top processes

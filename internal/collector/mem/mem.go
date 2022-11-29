@@ -11,15 +11,19 @@ import (
 
 const key = "mem"
 
-type memCollector struct{}
-
-func init() {
-	model.Register(key, &memCollector{})
+type memCollector struct {
+	config model.CollectorConfig
 }
 
-func (c *memCollector) Setup(params map[string]any) {}
+func init() {
+	model.RegisterCollector(key, &memCollector{})
+}
 
-func (*memCollector) Collect() any {
+func (c *memCollector) Setup(config model.CollectorConfig) model.Collector {
+	return c
+}
+
+func (c *memCollector) Collect() any {
 	mem, err := memory.Get()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)

@@ -5,12 +5,12 @@ import (
 )
 
 type Collector interface {
-	Setup(collectorConfig map[string]any)
+	Setup(collectorConfig CollectorConfig) Collector
 	Collect() any
 }
 
 type CollectorConfig struct {
-	Key         string
+	Collector   string
 	Topic       string
 	Title       string
 	Description string

@@ -39,10 +39,14 @@ func RunCollectors() {
 }
 
 func MonitorCollector(col model.CollectorConfig) {
-	model.Registry[col.Key].Setup(col.Params)
+	model.CollectorInstances[col.Topic] = model.CollectorBinding{
+		Collector: model.Registry[col.Collector].Setup(col),
+	}
 	for {
-		result := model.Registry[col.Key].Collect()
-		ws.WriteMessage(col.Topic, result)
+		result := model.CollectorInstances[col.Topic].Collector.Collect()
+
+		ws.WriteMessage(col.Topic, result) // TODO - write only to subscribers
+
 		time.Sleep(col.Frequency)
 	}
 }

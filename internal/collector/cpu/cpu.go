@@ -12,13 +12,17 @@ import (
 
 const key = "cpu"
 
-type cpuCollector struct{}
-
-func init() {
-	model.Register(key, &cpuCollector{})
+type cpuCollector struct {
+	config model.CollectorConfig
 }
 
-func (c *cpuCollector) Setup(params map[string]any) {}
+func init() {
+	model.RegisterCollector(key, &cpuCollector{})
+}
+
+func (c *cpuCollector) Setup(config model.CollectorConfig) model.Collector {
+	return c
+}
 
 func (c *cpuCollector) Collect() any {
 	before, err := cpu.Get()

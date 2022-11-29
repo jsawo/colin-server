@@ -10,24 +10,26 @@ import (
 const key = "cmd"
 
 type cmdCollector struct {
+	config    model.CollectorConfig
 	command   string
 	directory string
 }
 
 func init() {
-	model.Register(key, &cmdCollector{})
+	model.RegisterCollector(key, &cmdCollector{})
 }
 
-func (c *cmdCollector) Setup(params map[string]any) {
-	if _, ok := params["command"]; !ok {
+func (c *cmdCollector) Setup(config model.CollectorConfig) model.Collector {
+	if _, ok := config.Params["command"]; !ok {
 		log.Fatal("'command' key is missing in 'cmd' collector configuration")
 	}
 
-	if dir, ok := params["directory"]; ok {
+	if dir, ok := config.Params["directory"]; ok {
 		c.directory = dir.(string)
 	}
 
-	c.command = params["command"].(string)
+	c.command = config.Params["command"].(string)
+	return c
 }
 
 func (c *cmdCollector) Collect() any {

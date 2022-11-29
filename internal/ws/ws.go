@@ -80,6 +80,7 @@ func readFromWs(ws *websocket.Conn, remoteAddr string) {
 		}
 
 		fmt.Printf("Received data from WS client (%v): %v \n", remoteAddr, string(data))
+		handleClientCommands(remoteAddr, string(data))
 	}
 }
 

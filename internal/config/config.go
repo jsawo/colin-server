@@ -37,11 +37,11 @@ func ReadInConfig() {
 	for _, entry := range collectorConfig.Entries {
 		parsedCollector := parseCollector(entry)
 
-		if _, ok := CollectorConfigs[parsedCollector.Key]; ok {
-			log.Fatalf("multiple collectors with the same key are not allowed: %q", parsedCollector.Key)
+		if _, ok := CollectorConfigs[parsedCollector.Topic]; ok {
+			log.Fatalf("multiple collectors with the same topic are not allowed: %q", parsedCollector.Topic)
 		}
 
-		CollectorConfigs[parsedCollector.Key] = parsedCollector
+		CollectorConfigs[parsedCollector.Topic] = parsedCollector
 	}
 }
 
@@ -67,8 +67,8 @@ func parseCollector(entry Entry) model.CollectorConfig {
 
 	for key, value := range entry {
 		switch key {
-		case "key":
-			col.Key = entry[key]
+		case "collector":
+			col.Collector = entry[key]
 		case "topic":
 			col.Topic = entry[key]
 		case "title":
@@ -101,12 +101,12 @@ func parseConfig(configPath string) (*AppConfig, error) {
 }
 
 func validateEntry(entry Entry) {
-	key, ok := entry["key"]
+	key, ok := entry["topic"]
 	if !ok {
-		log.Fatal("'key' value is missing in a collector configuration")
+		log.Fatal("'topic' value is missing in a collector configuration")
 	}
 
-	requireValue(entry, key, "topic")
+	requireValue(entry, key, "collector")
 	requireValue(entry, key, "title")
 	requireValue(entry, key, "description")
 }

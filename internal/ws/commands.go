@@ -20,7 +20,7 @@ func handleClientCommands(remoteAddr, command string) {
 func handleClientSubscription(remoteAddr string, topics []string) {
 	fmt.Printf("Client %v requests subscription to %q \n", remoteAddr, topics)
 
-	for topic, _ := range model.CollectorInstances {
+	for topic := range model.CollectorInstances {
 		for _, topicRequest := range topics {
 			if topicRequest == topic || topicRequest == "*" {
 				model.SubscribeClient(remoteAddr, topic)

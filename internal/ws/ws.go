@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jsawo/colin-server/internal/model"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -15,13 +17,12 @@ const (
 )
 
 var (
-	clients       = make(map[string]Client)
-	messageBus    = make(chan Message)
-	messageWriter = defaultMessageWriter
+	clients    = make(map[string]Client)
+	messageBus = make(chan Message)
 )
 
 type Message struct {
-	Type      string    `json:"type"`
+	Topic     string    `json:"topic"`
 	Payload   any       `json:"payload"`
 	Timestamp time.Time `json:"timestamp"`
 }
@@ -96,19 +97,25 @@ func WriteToWS() {
 	}()
 
 	for {
-		var err error
 		select {
 		case msg := <-messageBus:
-			for _, client := range clients {
-				err = client.Conn.WriteJSON(msg)
-
-				if err != nil {
-					closeConnection(client.Addr)
+			if msg.Topic == "memory" {
+				fmt.Printf("Writing message to clients in %s: %+v \n", msg.Topic, model.CollectorInstances[msg.Topic].Clients)
+			}
+			for _, clientAddr := range model.CollectorInstances[msg.Topic].Clients {
+				if _, ok := clients[clientAddr]; !ok {
+					model.RemoveClient(clientAddr)
+				} else {
+					client := clients[clientAddr]
+					err := client.Conn.WriteJSON(msg)
+					if err != nil {
+						closeConnection(client.Addr)
+					}
 				}
 			}
 		case <-pingTicker.C:
 			for _, client := range clients {
-				if err = client.Conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				if err := client.Conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 					closeConnection(client.Addr)
 				}
 			}
@@ -122,21 +129,12 @@ func closeConnection(addr string) {
 	delete(clients, addr)
 }
 
-func WriteMessage(msgType string, payload any) {
-	writeMessage(Message{msgType, payload, time.Now()})
-}
-
-func writeMessage(msg Message) {
-	//fmt.Printf("WS message: %q \n", msg)
-	messageWriter(msg)
-}
-
-func SetMessageWriter(writer func(msg Message)) {
-	messageWriter = writer
-}
-
-func defaultMessageWriter(msg Message) {
+func WriteMessage(topic string, payload any) {
 	if len(clients) > 0 {
-		messageBus <- msg
+		messageBus <- Message{
+			Topic:     topic,
+			Payload:   payload,
+			Timestamp: time.Now(),
+		}
 	}
 }

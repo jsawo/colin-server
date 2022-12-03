@@ -39,14 +39,15 @@ func RunCollectors() {
 }
 
 func MonitorCollector(col model.CollectorConfig) {
+	model.CollectorsMutex.Lock()
 	model.CollectorInstances[col.Topic] = model.CollectorBinding{
 		Collector: model.Registry[col.Collector].Setup(col),
 	}
+	model.CollectorsMutex.Unlock()
+
 	for {
 		result := model.CollectorInstances[col.Topic].Collector.Collect()
-
-		ws.WriteMessage(col.Topic, result) // TODO - write only to subscribers
-
+		ws.WriteMessage(col.Topic, result)
 		time.Sleep(col.Frequency)
 	}
 }

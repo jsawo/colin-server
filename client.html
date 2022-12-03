@@ -31,11 +31,12 @@
         conn = new WebSocket(address)
         conn.onclose = function (evt) {
           let item = document.createElement("div")
-          item.innerHTML = "<b>Connection closed.</b>"
+
+          item.innerHTML = "<b>❌ Connection closed.</b>"
           appendLog(item)
           setTimeout(() => {
             let item = document.createElement("div")
-            item.innerHTML = "<b>trying to reconnect …</b>"
+            item.innerHTML = "<b>⏳ trying to reconnect …</b>"
             appendLog(item)
             reconnect()
           }, 5000)
@@ -47,16 +48,16 @@
             let item = document.createElement("div")
             let msg = JSON.parse(messages[i])
             let d = new Date(msg["timestamp"])
-            item.innerHTML = `${d.toLocaleString("pl-PL")} - <b>${msg["type"]}</b> - ${msg["payload"]}`
+            item.innerHTML = `${d.toLocaleString("pl-PL")} - <b>${msg["topic"]}</b> - ${msg["payload"]}`
             appendLog(item)
           }
         }
         conn.onopen = function (evt) {
           let item = document.createElement("div")
-          item.innerHTML = "<b>Connection opened.</b>"
+          item.innerHTML = "<b>✅ Connection opened.</b>"
           appendLog(item)
 
-          conn.send("SUB *") // <- subscribe to topics
+          conn.send("SUB memory") // <- subscribe to topics
         }
       } else {
         let item = document.createElement("div")

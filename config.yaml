@@ -1,31 +1,31 @@
 collectors:
   - topic: memory # name of the topic on which results will get exposed - needs to be unique
+    enabled: true # should this collector be running
     collector: mem # which collector to instantiate
     title: memory use # used for ToC
     description: Percentage of memory used. # used for ToC
-    enabled: true # should this collector be running
     type: gauge # gauge / counter / histogram 0.5|1.0|2.5|5.0|10 / text / json
     frequency: 10s # XXs / XXm / XXh / XXmYYs - how ofter should we run the collector
   - topic: processor
+    enabled: true
     collector: cpu
     title: cpu use
     description: Percentage of cpu used.
-    enabled: true
-    type: gauge 
+    type: gauge
     frequency: 5s
   - topic: top
+    enabled: true
     collector: cmd
     command: top -b | head -n 5
     title: top processes
     description: current top processes
-    enabled: true
     type: text
     frequency: 15s
   - topic: pwd
+    enabled: true
     collector: cmd
     command: pwd
     title: pwd
     description: pwd
-    enabled: true
     type: text
     frequency: 5s

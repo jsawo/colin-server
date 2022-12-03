@@ -19,7 +19,7 @@ func init() {
 	model.RegisterCollector(key, &memCollector{})
 }
 
-func (c *memCollector) Setup(config model.CollectorConfig) model.Collector {
+func (c *memCollector) NewCollector(config model.CollectorConfig) model.Collector {
 	return c
 }
 

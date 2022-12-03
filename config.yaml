@@ -13,14 +13,14 @@ collectors:
     description: Percentage of cpu used.
     type: gauge
     frequency: 5s
-  - topic: top
+  - topic: whoami
     enabled: true
     collector: cmd
-    command: top -b | head -n 5
-    title: top processes
-    description: current top processes
+    command: whoami
+    title: whoami
+    description: whoami
     type: text
-    frequency: 15s
+    frequency: 5s
   - topic: pwd
     enabled: true
     collector: cmd

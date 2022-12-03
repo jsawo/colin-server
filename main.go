@@ -38,17 +38,17 @@ func RunCollectors() {
 	}
 }
 
-func MonitorCollector(col model.CollectorConfig) {
+func MonitorCollector(cfg model.CollectorConfig) {
 	model.CollectorsMutex.Lock()
-	model.CollectorInstances[col.Topic] = model.CollectorBinding{
-		Collector: model.Registry[col.Collector].Setup(col),
+	model.CollectorInstances[cfg.Topic] = model.CollectorBinding{
+		Collector: model.Registry[cfg.Collector].NewCollector(cfg),
 	}
 	model.CollectorsMutex.Unlock()
 
 	for {
-		result := model.CollectorInstances[col.Topic].Collector.Collect()
-		ws.WriteMessage(col.Topic, result)
-		time.Sleep(col.Frequency)
+		result := model.CollectorInstances[cfg.Topic].Collector.Collect()
+		ws.WriteMessage(cfg.Topic, result)
+		time.Sleep(cfg.Frequency)
 	}
 }
 

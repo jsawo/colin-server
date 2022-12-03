@@ -20,7 +20,7 @@ func init() {
 	model.RegisterCollector(key, &cpuCollector{})
 }
 
-func (c *cpuCollector) Setup(config model.CollectorConfig) model.Collector {
+func (c *cpuCollector) NewCollector(config model.CollectorConfig) model.Collector {
 	return c
 }
 

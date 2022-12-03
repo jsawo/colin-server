@@ -5,7 +5,7 @@ import (
 )
 
 type Collector interface {
-	Setup(collectorConfig CollectorConfig) Collector
+	NewCollector(collectorConfig CollectorConfig) Collector
 	Collect() any
 }
 

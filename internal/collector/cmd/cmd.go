@@ -19,17 +19,18 @@ func init() {
 	model.RegisterCollector(key, &cmdCollector{})
 }
 
-func (c *cmdCollector) Setup(config model.CollectorConfig) model.Collector {
+func (c *cmdCollector) NewCollector(config model.CollectorConfig) model.Collector {
+	col := &cmdCollector{}
 	if _, ok := config.Params["command"]; !ok {
 		log.Fatal("'command' key is missing in 'cmd' collector configuration")
 	}
 
 	if dir, ok := config.Params["directory"]; ok {
-		c.directory = dir.(string)
+		col.directory = dir.(string)
 	}
 
-	c.command = config.Params["command"].(string)
-	return c
+	col.command = config.Params["command"].(string)
+	return col
 }
 
 func (c *cmdCollector) Collect() any {

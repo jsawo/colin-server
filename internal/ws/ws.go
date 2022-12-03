@@ -99,9 +99,6 @@ func WriteToWS() {
 	for {
 		select {
 		case msg := <-messageBus:
-			if msg.Topic == "memory" {
-				fmt.Printf("Writing message to clients in %s: %+v \n", msg.Topic, model.CollectorInstances[msg.Topic].Clients)
-			}
 			for _, clientAddr := range model.CollectorInstances[msg.Topic].Clients {
 				if _, ok := clients[clientAddr]; !ok {
 					model.RemoveClient(clientAddr)

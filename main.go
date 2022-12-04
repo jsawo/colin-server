@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"time"
+
+	"github.com/jsawo/colin-server/internal/cache"
 
 	"github.com/jsawo/colin-server/internal/config"
 	"github.com/jsawo/colin-server/internal/model"
@@ -23,7 +23,6 @@ func main() {
 	config.ReadInConfig()
 
 	go server.StartServer()
-	// go generateNoise()
 
 	RunCollectors()
 
@@ -47,16 +46,13 @@ func MonitorCollector(cfg model.CollectorConfig) {
 
 	for {
 		result := model.CollectorInstances[cfg.Topic].Collector.Collect()
-		ws.WriteMessage(cfg.Topic, result)
-		time.Sleep(cfg.Frequency)
-	}
-}
+		cache.AddValue(cfg.Topic, result)
+		ws.SendMessageToSubscribers(ws.Message{
+			Topic:     cfg.Topic,
+			Payload:   result,
+			Timestamp: time.Now(),
+		})
 
-func generateNoise() {
-	rand.Seed(time.Now().UnixNano())
-	for {
-		n := rand.Intn(10)
-		time.Sleep(time.Duration(n) * time.Second)
-		ws.WriteMessage("dummy", fmt.Sprintf("Message delayed %v seconds\n", n))
+		time.Sleep(cfg.Frequency)
 	}
 }

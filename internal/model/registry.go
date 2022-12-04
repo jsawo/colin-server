@@ -1,9 +1,9 @@
 package model
 
 import (
-	"fmt"
-	"golang.org/x/exp/slices"
 	"sync"
+
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -21,14 +21,17 @@ type CollectorBinding struct {
 	Clients   []string
 }
 
-func SubscribeClient(client, topic string) {
-	fmt.Printf("- client %v subscribes to %q \n", client, topic)
+func SubscribeClient(client, topic string) bool {
 	if instance, ok := CollectorInstances[topic]; ok {
 		if !slices.Contains(instance.Clients, client) {
 			instance.Clients = append(instance.Clients, client)
 			CollectorInstances[topic] = instance
+
+			return true
 		}
 	}
+
+	return false
 }
 
 func RemoveClient(client string) {

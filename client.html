@@ -57,7 +57,8 @@
           item.innerHTML = "<b>✅ Connection opened.</b>"
           appendLog(item)
 
-          conn.send("SUB whoami,pwd") // <- subscribe to topics
+          // conn.send("SUB whoami,pwd") // <- subscribe to topics
+          conn.send("SUB pwd") // <- subscribe to topics
         }
       } else {
         let item = document.createElement("div")

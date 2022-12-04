@@ -22,14 +22,13 @@ var (
 )
 
 type Message struct {
-	Topic     string    `json:"topic"`
-	Payload   any       `json:"payload"`
-	Timestamp time.Time `json:"timestamp"`
+	Topic      string    `json:"topic"`
+	Payload    any       `json:"payload"`
+	Timestamp  time.Time `json:"timestamp"`
+	Recipients []string  `json:"recipients"`
 }
 
 func ServeWS(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("client connected to websocket")
-
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -80,7 +79,7 @@ func readFromWs(ws *websocket.Conn, remoteAddr string) {
 			break
 		}
 
-		fmt.Printf("Received data from WS client (%v): %v \n", remoteAddr, string(data))
+		fmt.Printf("<< WS client (%v): %v \n", remoteAddr, string(data))
 		handleClientCommands(remoteAddr, string(data))
 	}
 }
@@ -99,13 +98,14 @@ func WriteToWS() {
 	for {
 		select {
 		case msg := <-messageBus:
-			for _, clientAddr := range model.CollectorInstances[msg.Topic].Clients {
+			for _, clientAddr := range msg.Recipients {
 				if _, ok := clients[clientAddr]; !ok {
 					model.RemoveClient(clientAddr)
 				} else {
 					client := clients[clientAddr]
 					err := client.Conn.WriteJSON(msg)
 					if err != nil {
+						fmt.Printf("ERR: closing connection due to websockets write error: %v \n", err)
 						closeConnection(client.Addr)
 					}
 				}
@@ -121,17 +121,33 @@ func WriteToWS() {
 }
 
 func closeConnection(addr string) {
-	fmt.Printf("WS closing client connection. Remaining clients: %d \n", len(clients)-1)
+	fmt.Printf("Client left - remaining clients: %d \n", len(clients)-1)
 	_ = clients[addr].Conn.Close()
 	delete(clients, addr)
 }
 
-func WriteMessage(topic string, payload any) {
-	if len(clients) > 0 {
-		messageBus <- Message{
-			Topic:     topic,
-			Payload:   payload,
-			Timestamp: time.Now(),
+func SendMessageToSubscribers(msg Message) {
+	var recipients []string
+	for _, clientAddr := range model.CollectorInstances[msg.Topic].Clients {
+		if _, ok := clients[clientAddr]; !ok {
+			model.RemoveClient(clientAddr)
+		} else {
+			recipients = append(recipients, clientAddr)
 		}
 	}
+	msg.Recipients = recipients
+	messageBus <- msg
+}
+
+func SendMessageToAll(msg Message) {
+	var recipients []string
+	for _, client := range clients {
+		recipients = append(recipients, client.Addr)
+	}
+	msg.Recipients = recipients
+	messageBus <- msg
+}
+
+func SendMessageToRecipients(msg Message) {
+	messageBus <- msg
 }
